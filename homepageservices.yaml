@@ -1,0 +1,501 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/widgets/services/
+# https://gethomepage.dev/widgets/
+# Icons at https://github.com/walkxcode/dashboard-icons/blob/main/ICONS.md
+# Material Design Icons with mdi at https://pictogrammers.com/library/mdi/
+# Simple icons with si- at https://simpleicons.org/
+
+- OMV:
+#    - Glances:
+#        icon: glances
+#        href: http://192.168.20.2:61208/
+#        description: OMV server stats
+#        widget:
+#          type: glances
+#          url: http://192.168.20.2:61208
+#          version: 4 # required only if running glances v4 or higher, defaults to 3
+#          metric: cpu
+#          diskUnits: bytes # optional, bytes (default) or bbytes. Only applies to disk
+#          refreshInterval: 5000 # optional - in milliseconds, defaults to 1000 or more, depending on the metric
+#          pointsLimit: 15 # optional, defaults to 15
+    - Beszel OMV:
+        icon: beszel.svg  # Optional custom icon
+        href: http://192.168.20.2:8093
+        description: Server monitoring
+        widget:
+          type: beszel
+          url: http://192.168.20.2:8093  # Your reverse proxy URL
+          username: yourlogin@mail     # Beszel login email
+          password: yourpassword       # Beszel password
+          systemId: yoyrsystemid       # Optional: specific system ID for single-system view
+          version: 2                   # Use 2 for Beszel >=0.9.0
+          fields: [cpu, memory, disk, network]
+    - Beszel Hetzner:
+        icon: beszel.svg  # Optional custom icon
+        href: http://192.168.20.2:8093
+        description: Server monitoring
+        widget:
+          type: beszel
+          url: http://192.168.20.2:8093  # Your reverse proxy URL
+          username: login@mail                # Beszel login email
+          password: yourpass                  # Beszel password
+          systemId: yoursysid                  # Optional: specific system ID for single-system view
+          version: 2                           # Use 2 for Beszel >=0.9.0
+          fields: [cpu, memory, disk, network]
+          
+    - Portainer:
+        icon: portainer
+        href: http://192.168.20.2:9000/
+        description: Manage Docker containers
+        widget:
+          type: portainer
+          url: http://192.168.20.2:9000
+          env: 1
+          key: yourkey
+          
+#    - Nginx PM:
+#        icon: nginx-proxy-manager
+#        href: http://192.168.20.2:81/
+#        description: Manage reverse proxy hosts
+#        widget:
+#          type: npm
+#          url: http://192.168.20.2:81
+#          username: username@mail
+#          password: yourpass
+
+    - Fresh RSS:
+        icon: freshrss
+        href: http://192.168.20.2:32788
+        description: RSS News Reader
+        widget:
+          type: freshrss
+          url: https://freshrss.gadgeteerza.co.za/
+          username: username
+          password: yourpass
+        
+#    - AdGuard Home:
+#        icon: adguard-home
+#        href: http://192.168.20.2:3500/
+#        description: DNS and Ad Blocking
+#        widget:
+#          type: adguard
+#          url: http://192.168.20.2:3500/
+#          username: admin
+#          password: yourpass
+          
+    - Change Detection:
+        icon: changedetection
+        href: http://192.168.20.2:5000/
+        description: Notifies of web page changes
+        widget:
+          type: changedetectionio
+          url: http://192.168.20.2:5000/
+          key: yourkey
+#         password: yourpass
+        
+    - Home Assistant:
+        icon: home-assistant-alt
+        href: http://192.168.20.2:8123
+        description: Manage home sensors and automation
+        widget:
+          type: homeassistant
+          url: http://192.168.20.2:8123
+          key: yourlongkey
+          custom:
+            - state: sensor.ac_loads
+              label: AC Loads
+            - state: sensor.battery_soc
+              label: Battery %
+        
+    - Paperless-ngx:
+        icon: paperless
+        href: http://192.168.20.2:8010/
+        description: Our document archives
+        widget:
+          type: paperlessngx
+          url: http://192.168.20.2:8010
+          key: yourkey
+        
+    - Jellyfin:
+        icon: jellyfin
+        href: http://192.168.20.2:8096
+        description: Movies and Entertainment
+#        server: my-docker
+#        container: jellyfin
+        widget:
+          type: jellyfin
+          url: http://192.168.20.2:8096
+          key: yourkey
+          enableBlocks: true # optional, defaults to false
+          enableNowPlaying: true # optional, defaults to true
+          enableUser: true # optional, defaults to false
+          showEpisodeNumber: true # optional, defaults to false
+          expandOneStreamToTwoRows: false # optional, defaults to true
+          
+    - Tube Archivist:
+        icon: tube-archivist
+        href: http://192.168.20.2:8050
+        description: My archived YiuTube videos
+#        widget:
+#          type: tubearchivist
+#          url: http://192.168.20.2:8050
+#          key: yourkey
+    - Watchtower:
+        icon: watchtower
+        description: Monitors containers for updates
+        widget:
+          type: watchtower
+          url: http://192.168.20.2:8090
+          key: yourkey
+          
+    - Grafana:
+        icon: grafana
+        description: Graphical dashboards of system and home data
+        href: http://192.168.20.2:3005
+        widget:
+          type: grafana
+          url: http://192.168.20.2:3005
+          username: admin
+          password: yourpass
+
+    - Uptime Kuma OMV:
+        icon: uptime-kuma
+        href: http://192.168.20.2:3001/dashboard
+        description: OMV docker services uptime monitor
+        widget:
+          type: uptimekuma
+          url: http://192.168.20.2:3001
+          slug: omvcontainers
+          
+    - Uptime Robot:
+        icon: uptimerobot
+        href: https://dashboard.uptimerobot.com/monitors
+        description: Monitoring of public services
+        widget:
+          type: uptimerobot
+          url: https://api.uptimerobot.com
+          key: yourkey
+    - Bookmarks:
+        icon: linkwarden
+        href: http://192.168.20.2:3400
+        description: Linkwarden bookmarks - Read It Later
+        widget:
+            type: linkwarden
+            url: http://192.168.20.2:3400
+            key: yourkey
+
+    - OpenMediaVault:
+        icon: openmediavault
+        href: http://192.168.20.2:85
+        description: Manage OMV setup (SMART status below)
+        widget:
+            type: openmediavault
+            url: http://192.168.20.2:85
+            username: admin
+            password: "yourpass"
+            method: smart.getListBg
+            siteMonitor: http://192.168.20.2:85
+            
+    - Immich Photos:
+        icon: immich
+        description: Family and shared photo albums
+        href: http://192.168.20.2:2283
+        widget:
+            type: immich
+            url: http://192.168.20.2:2283
+            key: yourkey
+            version: 2 # optional, default is 1
+            
+    - Prometheus:
+        icon: prometheus
+        description: Stats and data scraper
+        href: http://192.168.20.2:9090
+        widget:
+            type: prometheus
+            url: http://192.168.20.2:9090
+
+    - What's Up Docker (WUD):
+        icon: whats-up-docker
+        href: http://192.168.20.2:3018/containers
+        description: Docker container updates
+        widget:
+          type: whatsupdocker
+          url: http://192.168.20.2:3018
+          username: admin # optional
+          password: yourpass # optional
+
+    - Dozzle:
+        icon: dozzle
+        href: http://192.168.20.2:8085/
+        description: Docker container resource usage and error logs
+        
+    - Wallos:
+        icon: wallos
+        href: http://192.168.20.2:8282/
+        description: Manage subscriptions
+
+    - StirlingPDF:
+        icon: stirling-pdf
+        href: http://192.168.20.2:8087
+        description: Swiss Army Knife for PDF docs
+    - BentoPDF:
+        icon: bentopdf
+        href: http://192.168.20.2:8088
+        description: Lightweight PDF editing
+            
+    - InfluxDB:
+        icon: influxdb
+        description: Database storing system and home data
+        href: http://192.168.20.2:8086
+        
+    - AdventureLog:
+        icon: adventure-log
+        description: Planning travel and trips
+        href: https://adventures.gadgeteerza.co.za/
+        
+
+#        icon: znc
+#        href: http://192.168.20.2:6501
+#        description: ZNC IRC Bouncer Admin
+
+#    - Watch Your LAN:
+#        icon: watchyourlan
+#        href: http://192.168.20.2:8840/
+#        description: Notification of unknown LAN devices
+        
+    - CCTV:
+        icon: reolink
+        href: https://192.168.30.2/
+        description: CCTV cameras
+        
+    - Victron:
+        icon: mdi-sun-angle
+        href: http://192.168.80.2/
+        description: Victron solar system
+          
+    - Weather Station:
+        icon: mdi-weather-lightning-rainy
+        href: https://ambientweather.net/dashboard
+        description: Our weather station
+        
+    - Syncthing Desktop:
+        icon: syncthing
+        href: https://127.0.0.1:8083/
+        description: Syncthing Danie Desktop
+        
+    - Syncthing Server:
+        icon: syncthing
+        href: https://192.168.20.2:8384/#
+        description: Syncthing Server
+        
+    - Full-Text RSS:
+        icon: freshrss
+        href: http://192.168.20.2:33425/
+        description: RSS Full Text retrieval
+        
+    - Reticulum MeshChat:
+        icon: requestly
+        href: http://192.168.20.2:8005/
+        description: Reticulum MeshChat on OMV
+        
+    - I2P Server:
+        icon: i2p
+        href: http://192.168.20.2:7657/home
+        description: I2P Server Console
+        
+
+- Hetzner VPS:
+#    - NextCloud:
+#        icon: nextcloud-white
+#        href: https://nextcloud.gadgeteer.co.za/
+#        description: NextCloud hosted service
+#        widget:
+#            type: nextcloud
+#            url: https://nextcloud.gadgeteer.co.za
+#            key: yourkey
+
+    - Uptime Kuma:
+        icon: uptime-kuma
+        href: https://uptimekuma.gadgeteer.co.za
+        description: Hetzner VPS Docker Containers uptime monitor
+        widget:
+            type: uptimekuma
+            url: https://uptimekuma.gadgeteer.co.za
+            slug: docker
+    - Portainer:
+        icon: portainer
+        href: http://172.20.0.50:9000/
+        description: Manage Docker containers
+    - Nginx PM:
+        icon: nginx-proxy-manager
+        href: http://172.20.0.100:81/
+        description: Manage Reverse proxy hosts
+    - WordPress:
+        icon: wordpress
+        href: https://gadgeteer.co.za/
+        description: My WordPress site
+        siteMonitor: https://gadgeteer.co.za
+#    - Piwigo:
+#        icon: piwigo
+#        href: https://photos.gadgeteer.co.za/
+#        description: Photo albums hosting
+    - Glances:
+        icon: glances
+        href: https://glances.gadgeteer.co.za/
+        description: Server stats
+    - Dozzle:
+        icon: dozzle
+        href: http://172.20.0.51:8080/
+        description: Docker container resource usage and error logs
+    - Gadgeteer Search:
+        icon: searxng
+        href: https://search.gadgeteer.co.za
+        description: SearXNG Search
+    - Matomo:
+        icon: matomo
+        href: https://matomo.gadgeteer.co.za/
+        description: Visitor stats
+    - Event Scheduling:
+        icon: rallly
+        href: https://rallly.gadgeteer.co.za/
+        description: Schedule events for a group
+    - Family Tree:
+        icon: webtrees
+        href: https://webtrees.gadgeteer.co.za/
+        description: Family tree
+    - Elgg:
+        icon: elastic
+        href: https://elgg.gadgeteer.co.za/
+        description: HAMNET Elgg
+    - Traefik:
+        icon: traefik
+        href: http://172.20.0.101:8080/
+        description: Reverse Proxy
+    - URL Shortener:
+        icon: yourls
+        href: https://links.gadgeteer.co.za/admin/index.php
+        description: YOURLS URL Shortner
+    - MicroBin:
+        icon: microbin
+        href: https://microbin.gadgeteer.co.za/auth_admin
+        description: My own Pastebin for code snippets
+    - Joplin:
+        icon: joplin
+        href: https://joplin.gadgeteer.co.za
+        description: Joplin notes sync server
+    - AFFiNE:
+        icon: affine
+        href: https://affine.gadgeteer.co.za
+        description: AFFiNE notes sync server
+    - OpenCloud:
+        icon: nextcloud
+        href: https://opencloud.gadgeteer.co.za/files/spaces/personal/
+        description: OpenCloud documents syncing
+#    - Wallabag:
+#        icon: wallabag
+#        href: https://wallabag.gadgeteer.co.za
+#        description: Read It Later service
+
+#- Uptime VPS:
+#    - Uptime Kuma:
+#        icon: uptime-kuma
+#        href: https://uptime.gadgeteer.co.za
+#        description: GadgeteerZA Public Services uptime monitor
+#        widget:
+#            type: uptimekuma
+#            url: https://uptime.gadgeteer.co.za
+#            slug: gadgeteer
+#    - Portainer:
+#        icon: portainer
+#        href: https://172.20.0.50:9443/
+#        description: Manage Docker containers
+#    - Nginx PM:
+#        icon: nginx-proxy-manager
+#        href: http://172.20.0.100:81/
+#        description: Manage Reverse proxy hosts
+#    - I2PD:
+#        icon: i2pd
+#        href: http://172.20.0.5:7070
+#        description: I2PD service
+#    - Reticulum MeshChat:
+#        icon: requestly
+#        href: http://172.20.0.6:8000
+#        description: Reticulum MeshChat on Uptime VPS
+
+- Ham Radio:
+    - OpenWebRx Pi Monitor:
+        icon: raspberrypi
+        href: http://192.168.50.2:8888/
+        description: OpenWebRx Pi CLI login
+    - OpenWebRx Cockpit:
+        icon: cockpit
+        href: https://192.168.50.2:9090/
+        description: Manage OpenWebRx updates
+    - OpenSPOT3:
+        icon: mdi-speaker-bluetooth
+        href: http://192.168.10.7/
+        description: OpenSPOT DMR dongle
+    - Tasmota Radio Power:
+        icon: tasmota
+        href: http://192.168.10.13/
+        description: Sonoff power for radios
+    - OpenWebRx:
+        icon: mdi-radio
+        href: http://192.168.50.2:8073
+        description: OpenWebRx SDR Receiver
+    - APRS:
+        icon: mdi-radio
+        href: https://aprs.fi/#!mt=roadmap&z=11&timerange=3600&tail=3600&lat=-33.94170&lng=18.70160
+        description: APRS mapping
+    - SARL Website:
+        icon: mdi-radio
+        href: https://mysarl.org.za/
+
+- Networks:
+    - OPNsense:
+        icon: opnsense
+        href: https://192.168.99.1:10443
+        description: Main firewall router
+        widget:
+            type: opnsense
+            url: https://192.168.99.1:10443
+            username: yourusername
+            password: yourpass
+            wan: igc0
+    - Zenarmor:
+        icon: zenarmor
+        href: https://dash.zenarmor.com/firewalls/Fr2bh9eTPu
+        description: LAN packet analysis
+    - Crowdsec:
+        icon: crowdsec
+        href: https://app.crowdsec.net/alerts
+        description: WAN IP blocking
+    - Tailscale:
+        icon: tailscale
+        href: https://login.tailscale.com/admin/machines
+        description: Manage remote tunnel to firewall
+        widget:
+          type: tailscale
+          deviceid: yourdevideid
+          key: yourkey
+    - Main Switch:
+        icon: tp-link
+        href: https://192.168.99.2
+        description: TP-Link SG2218
+    - Study Switch:
+        icon: tp-link
+        href: http://192.168.99.3
+        description: TP-Link TL-SG108E Study
+    - Lounge Switch:
+        icon: tp-link
+        href: http://192.168.99.4
+        description: TP-Link TL-SG108E Living Room
+    - Wireless AP:
+        icon: tp-link
+        href: https://192.168.99.25
+        description: Wireless Access Point
+    - KVM Switch:
+        icon: 
+        href: https://192.168.99.6
+        description: KVM switch on OMV server
