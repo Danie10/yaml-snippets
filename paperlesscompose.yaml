@@ -1,0 +1,93 @@
+# Paperles-ngx Docker-Compose
+
+services:
+  broker:
+    container_name: paperless-broker
+    image: docker.io/library/redis:7
+    hostname: paperless-broker
+    restart: unless-stopped
+    volumes:
+      # Left side is physical path on host server
+      - /srv/dev-disk-by-label-HD1/data/appdata/Config/paperless/redisdata:/data
+ 
+  db:
+    container_name: paperless-db
+    image: docker.io/library/postgres:16
+    hostname: paperless-db
+    restart: unless-stopped
+    volumes:
+      - /srv/dev-disk-by-label-HD1/data/appdata/Config/paperless/pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      # Don't change this password as it won't start
+      POSTGRES_PASSWORD: paperless
+ 
+  webserver:
+    container_name: paperless-ngx
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    hostname: paperless-ngx
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    depends_on:
+      - db
+      - broker
+    ports:
+      - 8010:8000
+    volumes:
+      - /srv/dev-disk-by-label-HD1/data/appdata/Config/paperless/data:/usr/src/paperless/data
+      - /srv/dev-disk-by-label-HD1/data/appdata/Config/paperless/media:/usr/src/paperless/media
+      - /srv/dev-disk-by-label-HD1/data/appdata/Config/paperless/export:/usr/src/paperless/export
+      - /srv/dev-disk-by-label-HD1/data/appdata/Config/paperless/consume:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://paperless-broker:6379
+      PAPERLESS_DBHOST: db
+# The UID and GID of the user used to run paperless in the container. Set this
+# to your UID and GID on the host so that you have write access to the
+# consumption directory.
+      USERMAP_UID: 998
+      USERMAP_GID: 100
+# Additional languages to install for text recognition, separated by a
+# whitespace. Note that this is
+# different from PAPERLESS_OCR_LANGUAGE (default=eng), which defines the
+# language used for OCR.
+# The container installs English, German, Italian, Spanish and French by
+# default.
+# See https://packages.debian.org/search?keywords=tesseract-ocr-&searchon=names&suite=buster
+# for available languages.
+      #PAPERLESS_OCR_LANGUAGES: tur ces
+# Adjust this key if you plan to make paperless available publicly. It should
+# be a very long sequence of random characters. You don't need to remember it.
+      PAPERLESS_SECRET_KEY: anylongrandomkeyhere
+# Use this variable to set a timezone for the Paperless Docker containers. If not specified, defaults to UTC.
+      PAPERLESS_TIME_ZONE: Africa/Johannesburg
+# The default language to use for OCR. Set this to the language most of your
+# documents are written in.
+      PAPERLESS_OCR_LANGUAGE: eng
+      PAPERLESS_TIKA_ENABLED: 1
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
+      PAPERLESS_TIKA_ENDPOINT: http://tika:9998
+      
+  gotenberg:
+    image: docker.io/gotenberg/gotenberg:8.7
+    container_name: gotenberg
+    hostname: gotenberg
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    # The gotenberg chromium route is used to convert .eml files. We do not
+    # want to allow external content like tracking pixels or even javascript.
+    command:
+      - gotenberg
+      - --chromium-disable-javascript=true
+      - --chromium-allow-list=file:///tmp/.*
+      - --api-timeout=300s
+ 
+  tika:
+    image: docker.io/apache/tika:latest
+    container_name: tika
+    hostname: tika
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    restart: unless-stopped
