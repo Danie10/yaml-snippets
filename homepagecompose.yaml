@@ -1,0 +1,22 @@
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    hostname: homepage
+    environment:
+      - PUID=998
+      - PGID=995 # Using docker group ID for socket access
+      - TZ=Africa/Johannesburg
+      - HOMEPAGE_ALLOWED_HOSTS=192.168.20.2:3200
+    labels:
+      # Watchtower updates
+      com.centurylinklabs.watchtower.enable: true
+      # What's Up Docker updates
+      wud.display.name: homepage
+      wud.tag.include: ^\d+\.(\d+)\.(\d+)$ # watch y.z tags only
+    ports:
+      - 3200:3000
+    volumes:
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/Homepage:/app/config # Make sure your local config directory exists
+      - /var/run/docker.sock:/var/run/docker.sock:ro # optional, for docker integrations
+    restart: unless-stopped
