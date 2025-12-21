@@ -1,0 +1,156 @@
+name: affine
+services:
+  affine:
+    image: ghcr.io/toeverything/affine:${AFFINE_REVISION:-stable}
+    container_name: affine_server
+    hostname: affine_server
+    networks:
+      - reverse-proxy-net
+      - affine
+    ports:
+      - '${PORT:-3010}:3010'
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      affine_migration:
+        condition: service_completed_successfully
+      indexer:
+        condition: service_healthy
+    volumes:
+      # custom configurations
+      - affineupload:/root/.affine/storage
+      - affineconfig:/root/.affine/config
+    env_file:
+      - stack.env
+    environment:
+      - REDIS_SERVER_HOST=redis
+      - DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/${DB_DATABASE:-affine}
+      - AFFINE_INDEXER_ENABLED=true
+      - AFFINE_INDEXER_SEARCH_ENDPOINT=http://indexer:9308
+    restart: unless-stopped
+    labels:
+      # This is only if you use Watchtower to get updates
+      com.centurylinklabs.watchtower.enable: "true"
+
+  affine_migration:
+    image: ghcr.io/toeverything/affine:${AFFINE_REVISION:-stable}
+    container_name: affine_migration_job
+    hostname: affine_migration
+    networks:
+      - affine
+    volumes:
+      # custom configurations
+      - affineupload:/root/.affine/storage
+      - affineconfig:/root/.affine/config
+    command: ['sh', '-c', 'node ./scripts/self-host-predeploy.js']
+    env_file:
+      - stack.env
+    environment:
+      - REDIS_SERVER_HOST=redis
+      - DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/${DB_DATABASE:-affine}
+      - AFFINE_INDEXER_ENABLED=true
+      - AFFINE_INDEXER_SEARCH_ENDPOINT=http://indexer:9308
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      indexer:
+        condition: service_healthy
+  indexer:
+    # Indexer does not need to be enabled unles you want the functionality
+    # See https://docs.affine.pro/self-host-affine/administer/indexer
+    image: manticoresearch/manticore:${MANTICORE_VERSION:-10.1.0}
+    container_name: affine_indexer
+    hostname: affine_indexer
+    networks:
+      - affine
+    volumes:
+      - affineindexer:/var/lib/manticore
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 65535
+        hard: 65535
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        ['CMD', 'wget', '-O-', 'http://127.0.0.1:9308']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+
+  redis:
+    image: redis
+    container_name: affine_redis
+    hostname: affine_redis
+    networks:
+      - affine
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: affine_postgres
+    hostname: affine_postgres
+    env_file:
+      - stack.env
+    networks:
+      - affine
+    volumes:
+      - affinedb:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE:-affine}
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+      # you better set a password for you database
+      # or you may add 'POSTGRES_HOST_AUTH_METHOD=trust' to ignore postgres security policy
+      POSTGRES_HOST_AUTH_METHOD: trust
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      test:
+        ['CMD', 'pg_isready', '-U', "${DB_USERNAME}", '-d', "${DB_DATABASE:-affine}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  reverse-proxy-net:
+    # Network is for reverse proxy to connect to container services
+    external: true
+    # Specify name so that it does not append stack name
+    name: reverse-proxy-net
+  affine:
+    name: affine
+
+volumes:
+  affineconfig:
+    # position of the configuration files to persist
+    name: affineconfig
+  affinedb:
+    # position of the database data to persist
+    name: affinedb
+  affineupload:
+    # position of the upload data(images, files, etc.) to persist
+    name: affineupload
+  affineindexer:
+    # optional indexer functionality storage
+    name: affineindexer
