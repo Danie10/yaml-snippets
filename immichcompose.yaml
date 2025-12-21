@@ -1,0 +1,120 @@
+# WARNING: Make sure to use the docker-compose.yml of the current release:
+#
+# https://github.com/immich-app/immich/releases/latest/download/docker-compose.yml
+#
+# Can use containernamne:intport if containe ron same docker network
+#
+name: immich
+services:
+  immich-server:
+    container_name: immich-server
+    hostname: immich-server
+    image: ghcr.io/immich-app/immich-server:\${IMMICH_VERSION:-release}
+    # extends:
+    #   file: hwaccel.transcoding.yml
+    #   service: cpu # set to one of [nvenc, quicksync, rkmpp, vaapi, vaapi-wsl] for accelerated transcoding
+    volumes:
+      - \${UPLOAD_LOCATION}:/usr/src/app/upload
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - stack.env
+    networks:
+      - immich
+      - reverse-proxy-net
+    # Ports can be commented out if container is on same docker network as Nginx Proxy Manager
+    ports:
+      - '2283:2283'
+    depends_on:
+      - redis
+      - database
+    restart: unless-stopped
+    healthcheck:
+     disable: false
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+
+  immich-machine-learning:
+    container_name: immich_machine_learning
+    # For hardware acceleration, add one of -[armnn, cuda, openvino] to the image tag.
+    # Example tag: \${IMMICH_VERSION:-release}-cuda
+    hostname: immich_machine_learning
+    image: ghcr.io/immich-app/immich-machine-learning:\${IMMICH_VERSION:-release}
+    # extends: # uncomment this section for hardware acceleration - see https://immich.app/docs/features/ml-hardware-acceleration
+    #   file: hwaccel.ml.yml
+    #   service: cpu # set to one of [armnn, cuda, openvino, openvino-wsl] for accelerated inference - use the \`-wsl\` version for WSL2 where applicable
+    networks:
+      - immich
+    volumes:
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/Immich/model-cache:/cache
+    env_file:
+      - stack.env
+    restart: unless-stopped
+    healthcheck:
+      disable: false
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+
+  redis:
+    container_name: immich_redis
+    hostname: immich_redis
+    image: docker.io/valkey/valkey:8-bookworm@sha256:42cba146593a5ea9a622002c1b7cba5da7be248650cbb64ecb9c6c33d29794b1
+    healthcheck:
+      test: redis-cli ping || exit 1
+    networks:
+      - immich
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+
+  database:
+    container_name: immich_postgres
+    hostname: immich_postgres
+    image: image: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
+    env_file:
+      - stack.env
+    networks:
+      - immich
+    environment:
+      POSTGRES_PASSWORD: \${DB_PASSWORD}
+      POSTGRES_USER: \${DB_USERNAME}
+      POSTGRES_DB: \${DB_DATABASE_NAME}
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+    volumes:
+      # Do not edit the next line. If you want to change the database storage location on your system, edit the value of DB_DATA_LOCATION in the .env file
+      - \${DB_DATA_LOCATION}:/var/lib/postgresql/data
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+
+  immich-public-proxy:
+    image: alangrainger/immich-public-proxy:latest
+    container_name: immich-public-proxy
+    hostname: immich-public-proxy
+    restart: unless-stopped
+    depends_on:
+      - immich-server
+    networks:
+      - immich
+      - reverse-proxy-net
+    # Ports can be commented out if container is on same docker network as Nginx Proxy Manager
+#    ports:
+#      - "3012:3000"
+    environment:
+      - IMMICH_URL=http://immich-server:2283
+    healthcheck:
+      test: wget -q -T 10 --spider http://immich-public-proxy:3000/share/healthcheck || exit 1
+      start_period: 10s
+      timeout: 5s
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    volumes:
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/Immich/immich_proxy/config.json:/app/config.json:ro
+
+networks:
+  immich:
+    name: immich
+  reverse-proxy-net:
+    # Joins existing network of this name so that Nginx Proxy Manager can connect
+    external: true
+    # Specify name so that it does not append stack name
+    name: reverse-proxy-net
