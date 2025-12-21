@@ -1,0 +1,90 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/settings
+
+
+title: GadgeteerZA's Awesome Homepage
+
+favicon: https://gadgeteer.co.za/wp-content/uploads/2021/12/cropped-hardhead-bevel90px.gif
+
+startUrl: http://192.168.20.2:3200/
+
+background:
+  image: https://photoshare.gadgeteerza.co.za/share/photo/NWZTHma4FFhsqiBGD-_1DvoVZvC2cKXZwCK5uR4IKyMS8DW0u2QGgaj1Mrce1qUIS1w/fa7bc3cb-eecf-4507-b213-037ed9b5c7a7/preview?auto=format&fit=crop&w=2560&q=80
+  brightness: 50 # 0, 50, 75...
+#  blur: sm # sm, "", md, xl
+
+  
+# This blur will clash with background image blur
+cardBlur: sm
+
+# Default all to equal height
+useEqualHeights: true
+
+# Open links ina  new tab
+target: _blank # Possible options include _blank, _self, and _top
+
+headerStyle: boxedWidgets
+
+# Common tabs are grouped together
+# Columns determine how many vertical columns next to each other
+# Style row means entries are stacked/listed vertically in multiple rows
+layout:
+  OMV:
+    tab: OMV
+    style: row
+    columns: 4
+  Ham Radio:
+    tab: OMV
+  Media:
+    tab: OMV
+  Hetzner VPS:
+    tab: Hetzner VPS
+    style: row
+    columns: 4
+  Networks:
+    tab: Networks
+    columns: 2
+    style: row
+  Social:
+    tab: Bookmarks
+    columns: 4
+    style: row
+  Amateur Radio:
+    tab: Bookmarks
+  Entertainment:
+    tab: Bookmarks
+  News:
+    tab: Bookmarks
+  Health & Fitness:
+    tab: Bookmarks
+  YouTube Channel:
+    tab: Bookmarks
+  Blogging:
+    tab: Bookmarks
+  4x4 Offroad:
+    tab: Bookmarks
+  Drones:
+    tab: Bookmarks
+  Shopping:
+    tab: Bookmarks
+  Reading:
+    tab: Bookmarks
+  Utilities:
+    tab: Bookmarks
+  Pebble:
+    tab: Bookmarks
+
+providers:
+#  openweathermap: yourapi
+  finnhub: yourapi
+
+quicklaunch:
+  searchDescriptions: true
+  hideInternetSearch: true
+  showSearchSuggestions: true
+  hideVisitURL: false
+  provider: duckduckgo # google, duckduckgo, bing, baidu, brave or custom
+
+# show all docker stats expanded
+showStats: true
