@@ -1,0 +1,58 @@
+services:
+  linkwardenpostgres:
+    image: postgres:16-alpine
+    container_name: linkwardenpostgres
+    hostname: linkwardenpostgres
+    environment:
+      - POSTGRES_PASSWORD=PostgresPass
+      - TZ=Africa/Johannesburg
+    restart: unless-stopped
+    volumes:
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/Linkwarden/postgres:/var/lib/postgresql/data
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      wud.display.name: Linkwarden PostgresDB ONLY v16
+      wud.tag.include: ^16-alpine
+      wud.watch.digest: true  # watch digest updates
+
+  linkwarden:
+    image: ghcr.io/linkwarden/linkwarden:latest
+    container_name: linkwarden
+    hostname: linkwarden
+    environment:
+      - DATABASE_URL=postgresql://postgres:PostgresPass@linkwardenpostgres:5432/postgres
+      - NEXTAUTH_URL=http://bookmarks.gadgeteerza.co.za/api/v1/auth
+      - NEXTAUTH_SECRET=yoursecreet
+      - TZ=Africa/Johannesburg
+      - NEXT_PUBLIC_DISABLE_REGISTRATION=true
+      - PAGINATION_TAKE_COUNT=20
+    restart: unless-stopped
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 1g
+    ports:
+      - 3400:3000
+    volumes:
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/Linkwarden/data:/data/data
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      wud.display.name: Linkwarden Server
+      wud.tag.include: v\d+\.\d+\.\d+
+      wud.link.template: "https://github.com/linkwarden/linkwarden/releases"
+    depends_on:
+      - linkwardenpostgres
+      - meilisearch
+  meilisearch:
+    image: getmeili/meilisearch:v1.12.8  # Must be compatoible with database version
+    container_name: meilisearch
+    hostname: meilisearch
+    restart: unless-stopped
+    env_file:
+      - stack.env
+    volumes:
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/Linkwarden/meili_data:/meili_data
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      wud.display.name: Linkwarden Meili stay v1.12.8
+      wud.tag.include: ^v1\.12\.8
