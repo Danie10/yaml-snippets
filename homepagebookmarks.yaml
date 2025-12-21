@@ -1,0 +1,237 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/bookmarks
+# Dashboard Icons: https://github.com/walkxcode/dashboard-icons/blob/main/ICONS.md
+# Material Design Icons with mdi at https://pictogrammers.com/library/mdi/
+# Simple icons with si- at https://simpleicons.org/
+
+#- Developer:
+#    - Github:
+#        - abbr: GH
+#          href: https://github.com/
+#    - Discord:
+#        - abbr: DI
+#          href: https://discord.com/channels/1221536306367303690/1226876917656064000
+
+- Social:
+    - Friendica:
+        - icon: friendica
+          href: https://squeet.me/profile/danie10
+    - Hubzilla:
+        - icon: hubzilla
+          abbr: HU
+          href: https://hub.netzgemeinde.eu/channel/gadgeteer
+    - MeWe:
+        - abbr: ME
+          href: https://mewe.com/groups
+    - Bluesky:
+        - icon: bluesky
+          abbr: BL
+          href: https://bsky.app
+    - Mastodon:
+        - icon: mastodon
+          href: https://mastodon.social/home
+    - Nostr:
+        - abbr: NO
+          href: https://coracle.social/notes
+    - IRC:
+        - icon: irc
+          href: http://192.168.20.2:64080
+    - Fedia:
+        - abbr: FE
+          href: https://fedia.io/
+          description: Federated Reddit Alt
+    - Reddit:
+        - abbr: RE
+          icon: reddit
+          href: https://reddit.com/
+    - Matrix:
+        - icon: matrix
+          href: https://app.element.io/#/room/#gadgeteerza:matrix.org
+- Amateur Radio:
+    - APRS:
+        - abbr: AP
+          icon: mdi-radio
+          href: https://aprs.fi/#!mt=roadmap&z=11&timerange=3600&tail=3600&lat=-33.94170&lng=18.70160
+    - PSK Reporter:
+        - abbr: PS
+          icon: mdi-radio
+          href: https://pskreporter.info/pskmap.html?preset&callsign=ZS1OSS&mode=VARAC&timerange=3600&distunit=km&hideunrec=1&blankifnone=1&hidenight=1&mapCenter=-28.803578320552703,27.054059234099835,5.846931994161416
+    - Meshmap:
+        - abbr: ME
+          icon: mdi-radio
+          href: https://meshmap.net/
+    - Meshmap2:
+        - abbr: MF
+          icon: mdi-radio
+          href: https://meshtastic.liamcottle.net/#
+          description: by Liam Cottle
+    - ZA Mesh:
+        - abbr: MZ
+          icon: mdi-radio
+          href: https://mesh.zr1rf.za.net
+          description: Rich ZA Stats
+    - OpenSPOT3:
+        - abbr: OP
+          icon: mdi-radio
+          href: http://192.168.10.7/
+    - OpenWebRx:
+        - abbr: RX
+          icon: mdi-radio
+          href: https://openwebrx.gadgeteerza.co.za/
+    - OpenWebRx Mon:
+        - abbr: RM
+          icon: mdi-radio
+          href: http://192.168.50.2:8888/
+    - Radio Power:
+        - abbr: RA
+          icon: mdi-radio
+          href: http://192.168.10.13/
+          description: Sonoff Switch
+          
+- Entertainment:
+    - YouTube:
+        - icon: youtube
+          abbr: YT
+          href: https://youtube.com/
+    - Jellyfin:
+        - icon: jellyfin
+          abbr: JE
+          href: http://192.168.20.2:8096/web/#/home.html
+
+- News:
+    - FreshRSS:
+        - icon: freshrss
+          abbr: RS
+          href: https://freshrss.gadgeteerza.co.za
+    - Omnivore:
+        - icon: omnivore
+          abbr: OM
+          href: https://omnivore.app/home?q=in%3Ainbox
+    - PressReader:
+        - abbr: PR
+          href: https://www.pressreader.com/catalog
+    - Bookwyrm:
+        - abbr: BO
+          href: https://bookwyrm.social
+          
+- Health & Fitness:
+    - Strava:
+        - icon: strava
+          abbr: ST
+          href: https://www.strava.com/dashboard
+    - Oura:
+        - abbr: OU
+          href: https://cloud.ouraring.com/dashboard
+    - Polar:
+        - abbr: PO
+          href: https://https://flow.polar.com/
+    - Sleep As Android:
+        - abbr: SL
+          href: https://https://sleep-cloud.appspot.com/SleepCloud.html
+
+- YouTube Channel:
+    - My Channel:
+        - icon: youtube
+          href: https://studio.youtube.com/channel/UCvE9lRxUdMzMyX8khseVVAg
+    - Canva:
+        - abbr: CA
+          href: https://www.canva.com/projects
+
+- Blogging:
+    - Cloudflare:
+        - icon: cloudflare
+          abbr: CL
+          href: https://dash.cloudflare.com/cb812a5a82673a779bb9a902d15620b2
+    - Make:
+        - abbr: MA
+          href: https://eu1.make.com/organization/orgno
+    - Buffer:
+        - abbr: BU
+          href: https://publish.buffer.com/calendar/week
+    - WordPress Gadgeteer:
+        - icon: wordpress
+          href: https://gadgeteer.co.za/wp-admin/index.php
+    - WordPress SAOSS:
+        - icon: wordpress
+          href: https://oss.gov.za/wp-admin/index.php
+          
+- 4x4 Offroad:
+    - Tracks4Africa Mapping:
+        - icon: mdi-car-estate
+          abbr: T4
+          href: https://map.tracks4africa.co.za/map
+    - OsmAnd Mapping:
+        - icon: mdi-car-estate
+          abbr: OS
+          href: https://osmand.net/map
+    - 4x4 Community Forum:
+        - icon: mdi-car-estate
+          abbr: 4X
+          href: https://www.4x4community.co.za/forum
+    - JimnyWorX SA:
+        - icon: mdi-car-estate
+          abbr: JI
+          href: https://www.jimnyworxsa.co.za/
+    - 4x4 Mega World:
+        - icon: mdi-car-estate
+          abbr: MW
+          href: https://www.4x4megaworldonline.com/vehicle-accessories/
+    - Front Runner:
+        - icon: mdi-car-estate
+          href: https://www.dometic.com/
+    - The 4X4 Store:
+        - icon: mdi-car-estate
+          href: https://the4x4store.co.za/
+    - Safari Centre:
+        - icon: mdi-car-estate
+          href: https://www.safaricentrecapetown.co.za
+    - 4X4 Direct:
+        - icon: mdi-car-estate
+          href: https://www.4x4direct.co.za/
+    - JIMSA:
+        - icon: mdi-car-estate
+          href: https://www.jimsa.co.za/
+    - MOD:
+        - icon: mdi-car-estate
+          href: https://www.mod.equipment
+
+- Drones:
+    - Private Drone Association of SA:
+        - icon: bookstack
+          abbr: 
+          description: Regulations, maps, etc
+          href: https://drones.org.za/
+    - Africa Drone Kings:
+        - icon: bookstack
+          abbr:
+          description: Good prices in Strand, CT
+          href: https://africadronekingswc.co.za
+          
+- Shopping:
+    - TakealotMore Status:
+        - description: TakealotMore status
+          href: https://www.takealot.com/account/subscriptions?lid=55555555
+    - Serval Price Tracking:
+        - description: Price history on Takealot items
+          href: https://www.servaltracker.com/
+    - Amazon Price Tracking:
+        - description: Price history on Amazon.com items
+          href: https://camelcamelcamel.com/
+
+- Reading:
+    - Kindle Highlights:
+        - description: My saved Kindle highlights and notes
+          href: https://read.amazon.com/notebook
+          
+- Utilities:
+    - Photopea:
+        - description: Browser based photo editing
+          href: https://www.photopea.com/
+- Pebble:
+    - Pebble Forum:
+        - description: Pebble apps Forum
+          href: https://forum.repebble.com/
+    - Rebble Dev Forum:
+        - description: Rebble apps Forum
+          href: https://forum.rebble.io/
