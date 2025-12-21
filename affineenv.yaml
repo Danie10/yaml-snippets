@@ -1,0 +1,5 @@
+AFFINE_REVISION=stable
+PORT=3010
+DB_USERNAME=affine
+DB_PASSWORD=YourPassword
+DB_DATABASE=affine
