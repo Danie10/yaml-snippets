@@ -1,0 +1,73 @@
+# Docker-compose for YOURLS
+# Go to domain/admin after installation
+
+services:
+  yourls:
+    image: yourls:latest
+    container_name: yourls
+    hostname: yourls
+    restart: always
+    ports:
+      - 8084:80
+    volumes:
+      - yourls-config:/var/www/html/user
+    environment:
+      YOURLS_DB_HOST: yourls-db:3306
+      YOURLS_DB_USER: yourls
+      YOURLS_DB_PASS: dbpassword
+      YOURLS_DB_NAME: yourls
+      YOURLS_SITE: https://links.gadgeteer.co.za
+      YOURLS_USER: admin
+      YOURLS_PASS: adminpassword
+      # Server timezone GMT offset
+      YOURLS_HOURS_OFFSET: 2
+      # Allow multiple short URLs for a same long URL
+      YOURLS_UNIQUE_URLS: false
+      # Private means the Admin area will be protected with login/pass as defined above
+      # Set to false for public usage for anyone to delete or add links
+      YOURLS_PRIVATE: true
+      # if set to true, disable stat logging (no use for it, too busy servers
+      YOURLS_NOSTATS: false
+      # A random secret hash used to encrypt cookies.
+      # Generate a unique one at https://yourls.org/cookie
+      YOURLS_COOKIEKEY: generatethishash
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    depends_on:
+      - yourls-db
+    networks:
+      yourls-net:
+      reverse-proxy-net:
+
+  yourls-db:
+    image: mariadb:latest
+    hostname: yourls-db
+    container_name: yourls-db
+    restart: always
+    volumes:
+      - yourls-db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: sqlrootpassword
+      MYSQL_DATABASE: yourls
+      MYSQL_USER: yourls
+      MYSQL_PASSWORD: dbpassword
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    networks:
+      yourls-net:
+
+networks:
+  yourls-net:
+      name: yourls-net
+  reverse-proxy-net:
+    # Joins existing network of this name
+    external: true
+    # Specify name so that it does not append stack name
+    name: reverse-proxy-net
+
+volumes:
+  yourls-db:
+    # Specify name so it does not append stack name
+    name: yourls-db
+  yourls-config:
+    name: yourls-config
