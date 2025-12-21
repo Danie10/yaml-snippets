@@ -1,0 +1,121 @@
+# LibrePhotos Docker-Compose
+
+# DO NOT EDIT
+# The .env file has everything you need to edit.
+# Run options:
+# 1. Use prebuilt images (preferred method):
+#   run cmd: docker-compose up -d
+# 2. Build images on your own machine:
+#   build cmd: COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build
+#   run cmd: docker-compose up -d
+ 
+version: "3.8"
+services:
+  proxy:
+    image: reallibrephotos/librephotos-proxy:${tag}
+    container_name: librephotos_proxy
+    hostname: librephotos_proxy
+    restart: unless-stopped
+    volumes:
+      - ${scanDirectory}:/data
+      - ${data}/protected_media:/protected_media
+      # Hardcoded a location to photo collection in another docker volume mapped to /data/piwigo
+      - /var/lib/docker/volumes/piwigogallery/_data/upload:/data/piwigo
+    env_file:
+      - stack.env
+    networks:
+      - mysql-net
+    ports:
+      - ${httpPort}:80
+    depends_on:
+      - backend
+      - frontend
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+ 
+  librephotos_db:
+    image: postgres:13
+    container_name: librephotos_db
+    hostname: librephotos_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${dbUser}
+      - POSTGRES_PASSWORD=${dbPass}
+      - POSTGRES_DB=${dbName}
+    volumes:
+      - ${data}/db:/var/lib/postgresql/data
+    env_file:
+      - stack.env
+    networks:
+      - mysql-net
+    command: postgres -c fsync=off -c synchronous_commit=off -c full_page_writes=off -c random_page_cost=1.0
+    healthcheck:
+      test: psql -U ${dbUser} -d ${dbName} -c "SELECT 1;"
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    labels:
+      # Enables Watchtower to notify about updated image
+      com.centurylinklabs.watchtower.enable: "true"
+ 
+  frontend:
+    image: reallibrephotos/librephotos-frontend:${tag}
+    container_name: librephotos_frontend
+    hostname: librephotos_frontend
+    env_file:
+      - stack.env
+    networks:
+      - mysql-net
+    restart: unless-stopped
+    labels:
+      # Enables Watchtower to notify about updated image
+      com.centurylinklabs.watchtower.enable: "true"
+ 
+  backend:
+    image: reallibrephotos/librephotos:${tag}
+    container_name: librephotos_backend
+    hostname: librephotos_backend
+    restart: unless-stopped
+    volumes:
+      - ${scanDirectory}:/data
+      - ${data}/protected_media:/protected_media
+      - ${data}/logs:/logs
+      - ${data}/cache:/root/.cache
+      # Hardcoded a location to photo collection in another docker volume mapped to /data/piwigo
+      - /var/lib/docker/volumes/piwigogallery/_data/upload:/data/piwigo
+    env_file:
+      - stack.env
+    networks:
+      - mysql-net
+    environment:
+      - SECRET_KEY=${shhhhKey:-}
+      - BACKEND_HOST=backend
+      - ADMIN_EMAIL=${adminEmail:-}
+      - ADMIN_USERNAME=${userName:-}
+      - ADMIN_PASSWORD=${userPass:-}
+      - DB_BACKEND=postgresql
+      - DB_NAME=${dbName}
+      - DB_USER=${dbUser}
+      - DB_PASS=${dbPass}
+      - DB_HOST=${dbHost}
+      - DB_PORT=5432
+      - MAPBOX_API_KEY=${mapApiKey:-}
+      - WEB_CONCURRENCY=${gunniWorkers:-1}
+      - SKIP_PATTERNS=${skipPatterns:-}
+      - ALLOW_UPLOAD=${allowUpload:-false}
+      - CSRF_TRUSTED_ORIGINS=${csrfTrustedOrigins:-}
+      - DEBUG=0
+      - HEAVYWEIGHT_PROCESS=${HEAVYWEIGHT_PROCESS:-}
+    labels:
+      # Enables Watchtower to notify about updated image
+      com.centurylinklabs.watchtower.enable: "true"
+    depends_on:
+      librephotos_db:
+        condition: service_healthy
+        
+networks:
+  mysql-net:
+    # Joins existing network of this name so that Nginx Proxy Manager can connect
+    external: true
+    # Specify name so that it does not append stack name
+    name: mysql-net
