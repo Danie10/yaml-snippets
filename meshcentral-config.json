@@ -1,0 +1,13 @@
+  "settings": {
+    "cert": "mesh.gadgeteerza.co.za",
+    "WANonly": true,
+    "_LANonly": true,
+    "_sessionKey": "MyReallySecretPassword1",
+    "cookieIpCheck": false,
+    "TlsOffload": "172.17.0.10",
+    "_ignoreAgentHashCheck": true,
+    "port": 444,
+    "aliasPort": 443,
+    "redirPort": 800,
+    "_redirAliasPort": 80
+  },
