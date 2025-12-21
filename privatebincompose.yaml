@@ -1,0 +1,35 @@
+# Docker Compose file for PrivateBin
+services:
+  privatebin:
+    image: privatebin/nginx-fpm-alpine:stable
+    container_name: privatebin
+    hostname: privatebin
+    networks:
+        - reverse-proxy-net
+    ports:
+      - 8070:8080
+    restart: unless-stopped
+    volumes:
+      - privatebin-data:/srv/data
+        # Volume below is to map for external config.php file
+      - privatebin-config:/srv/cfg
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    environment:
+        - TZ=Africa/Johannesburg
+        - PHP_TZ=Africa/Johannesburg
+ 
+volumes:
+  privatebin-data:
+    # Specify name so it does not append stack name
+    name: privatebin-data
+  privatebin-config:
+    # Specify name so it does not append stack name
+    name: privatebin-config
+ 
+networks:
+  reverse-proxy-net:
+    # Joins existing network of this name
+    external: true
+    # Specify name so that it does not append stack name
+    name: reverse-proxy-net
