@@ -1,0 +1,9 @@
+  "domains": {
+    "": {
+      "_title": "MyServer",
+      "_title2": "Servername",
+      "_minify": true,
+      "_newAccounts": true,
+      "certUrl": "https://mesh.gadgeteerza.co.za:443/",
+      "_userNameIsEmail": true
+    }
