@@ -1,0 +1,34 @@
+services:
+  piwigo:
+    image: lscr.io/linuxserver/piwigo
+    container_name: piwigo
+    hostname: piwigo
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Africa/Johannesburg
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    volumes:
+      - piwigoappdata:/config
+      - piwigogallery:/gallery
+    # Uncomment ports if using IP:port addressing - https://www.youtube.com/watch?v=DZRG2sezIl4
+    #ports:
+    #  - 8090:80
+    networks:
+      - mysql-net
+    restart: unless-stopped
+ 
+volumes:
+  piwigoappdata:
+    name: piwigoappdata
+  piwigogallery:
+    name: piwigogallery
+ 
+networks:
+  mysql-net:
+    # Joins existing network of this name - https://www.youtube.com/watch?v=NdwB5TPXCnQ
+    external: true
+    # Specify name so that it does not append stack name
+    name: mysql-net
+ 
