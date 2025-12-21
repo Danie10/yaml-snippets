@@ -1,0 +1,35 @@
+services:
+  beszel-agent:
+    image: henrygd/beszel-agent:alpine
+    container_name: beszel-agent
+    hostname: beszel-agent
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      # beszel_agent persists the metrics cache, config, etc between restarts of the agent
+      - /var/lib/docker/volumes/beszel/beszel_agent_data:/var/lib/beszel-agent
+      # beszel_socket only for local hub and agent sharing data
+      #- /var/lib/docker/volumes/beszel/beszel_socket:/beszel_socket
+      # docker.sock for direct container monitoring by the agent
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Add this if you want to monitor systemd services
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro
+    env_file:
+      - stack.env
+    environment:
+      LISTEN_ADDR: 45876
+
+      TOKEN: "${TOKEN}"
+      KEY: "${KEY}"
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      test: ['CMD', '/agent', 'health']
+      interval: 120s
+
+networks:
+  reverse-proxy-net:
+    # Network is for reverse proxy to connect to container services
+    external: true
+    # Specify name so that it does not append stack name
+    name: reverse-proxy-net
