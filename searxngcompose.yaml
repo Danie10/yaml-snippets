@@ -1,0 +1,78 @@
+services:
+  redis:
+    container_name: redis
+    hostname: redis
+    image: docker.io/valkey/valkey:8-alpine
+    command: valkey-server --save 30 1 --loglevel warning
+    restart: unless-stopped
+    networks:
+      - searxng
+    volumes:
+      - searxng-redis:/data
+    environment:
+      - TZ=Africa/Johannesburg
+    labels:
+      # Optional for Watchtower container updates
+      com.centurylinklabs.watchtower.enable: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+
+  searxng:
+    container_name: searxng
+    hostname: searxng
+    image: docker.io/searxng/searxng:latest
+    restart: unless-stopped
+    depends_on:
+      - redis
+    networks:
+      - searxng
+      - reverse-proxy-net
+    ports:
+      - 8080
+    volumes:
+      - searxng-data:/etc/searxng:rw
+    environment:
+      - SEARXNG_BASE_URL=https://search.gadgeteer.co.za/
+      - UWSGI_WORKERS=${SEARXNG_UWSGI_WORKERS:-4}
+      - UWSGI_THREADS=${SEARXNG_UWSGI_THREADS:-4}
+      - IMAGE_PROXY=true
+      - REDIS_URL=redis://redis:6379/0
+      - NAME=GadgeteerZA Search
+      - TZ=Africa/Johannesburg
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+
+networks:
+  searxng:
+  reverse-proxy-net:
+    # Joins existing network of this name
+    external: true
+    # Specify name so that it does not append stack name
+    name: reverse-proxy-net
+volumes:
+  searxng-data:
+    # Specify name so it does not append stack name
+    name: searxng-data
+  searxng-redis:
+    # Specify name so it does not append stack name
+    name: searxng-redis
