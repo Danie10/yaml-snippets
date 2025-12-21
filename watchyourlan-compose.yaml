@@ -1,0 +1,20 @@
+services:
+  wyl:
+    image: aceberg/watchyourlan
+    container_name: watchyourlan
+    hostname: watchyourlan
+    network_mode: "host"
+    restart: unless-stopped
+    volumes:
+    - /srv/dev-disk-by-label-HD1/data/appdata/Config/wyl:/data
+    environment:
+      TZ: Africa/Johannesburg # required: needs your TZ for correct time
+      IFACE: "enp3s0" # required: 1 or more interface
+      DBPATH: "/data/db.sqlite" # optional, default: /data/db.sqlite
+      GUIIP: "0.0.0.0" # optional, default: localhost
+      GUIPORT: "8840" # optional, default: 8840
+      TIMEOUT: "120" # optional, time in seconds, default: 60
+      SHOUTRRR_URL: "smtp://loginid@gmail.com:loginpassword@smtp.gmail.com:587/?from=fromaddresstoshow@gmail.com&to=toaddress@gmail.com" # optional, set url to notify
+      THEME: "darkly" # optional
+    labels:
+      com.centurylinklabs.watchtower.enable: true
