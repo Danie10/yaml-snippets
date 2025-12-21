@@ -1,0 +1,18 @@
+services:
+  pialert:
+    image: jokobsk/pi.alert
+    container_name: pialert
+    hostname: pialert
+    ports:
+      - "20211:20211/tcp"
+    environment:
+      - TZ=Africa/Johannesburg
+      - UID=998
+      - GID=100
+    network_mode: "host"
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    volumes:
+      - /srv/dev-disk-by-label-HD1/data/appdata/Config/PiAlert:/home/pi/pialert/db
+      - /srv/dev-disk-by-label-HD1/data/appdata/Config/PiAlert:/home/pi/pialert/config
