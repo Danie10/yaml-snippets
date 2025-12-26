@@ -1,0 +1,24 @@
+services:
+  languagetool:
+    image: erikvl87/languagetool
+    container_name: languagetool
+    hostname: languagetool
+    restart: unless-stopped
+    user: "998:100"  # OPTIONAL: Matches my OMV PUID/PGID
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - 8015:8010                        # I changed external port to 8015 to avoid clashes with other containers
+    environment:
+      - PUID=998                         # OPTIONAL: For my OMV server volume permissions
+      - PGID=100                         # OPTIONAL: For my OMV server volume permissions
+      - langtool_languageModel=/ngrams   # OPTIONAL: Using ngrams data for grammer
+      - Java_Xms=512m                    # OPTIONAL: Setting a minimal Java heap size of 512 mib
+      - Java_Xmx=1g                      # OPTIONAL: Setting a maximum Java heap size of 1 Gib
+    labels:
+      # These are all needed for Watchtower or WUD updaters only
+      com.centurylinklabs.watchtower.enable: true # Watchtower updates
+      wud.display.name: languagetool              # WUD name that will be shown
+    volumes:
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/LanguageTool/langtool_ngrams/:/ngrams     # OPTIONAL: The location of ngrams data on the local machine
+#      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/LanguageTool/langtool_logback/logback.xml:/LanguageTool/logback.xml:ro  # OPTIONAL: Overwrite the logging configuration
