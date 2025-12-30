@@ -26,11 +26,14 @@ services:
       - TZ=Africa/Johannesburg
       - NEXT_PUBLIC_DISABLE_REGISTRATION=true
       - PAGINATION_TAKE_COUNT=20
+      - NODE_OPTIONS=--max-old-space-size=1024 # Match this to 1GB to leave room for the browser
     restart: unless-stopped
-#    deploy:
-#      resources:
-#        limits:
-#          memory: 1g
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G      # Hard limit: Container will be killed if it exceeds this
+        reservations:
+          memory: 512M    # Soft limit: Docker will try to keep it at this level
     ports:
       - 3400:3000
     volumes:
