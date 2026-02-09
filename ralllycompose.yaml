@@ -1,0 +1,66 @@
+services:
+  rallly_db:
+    image: postgres:14.2
+    container_name: rallly_db
+    hostname: rallly_db
+    restart: unless-stopped
+    networks:
+      - rallly
+    volumes:
+      - Rallly:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rallly:
+    image: lukevella/rallly:latest
+    container_name: rallly
+    hostname: rallly
+    restart: unless-stopped
+    networks:
+      - reverse-proxy-net
+      - rallly
+    depends_on:
+      rallly_db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_PASSWORD}:postgres@rallly_db:5432/db
+      - NEXT_PUBLIC_BASE_URL=https://rallly.gadgeteer.co.za
+      - SECRET_PASSWORD=${SECRET_PASSWORD}
+      - ALLOWED_EMAILS=${ALLOWED_EMAILS}
+      - SUPPORT_EMAIL=${SUPPORT_EMAIL}
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_SECURE=false
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PWD=${SMTP_PWD}
+      - APP_NAME=GadgeteerZA Scheduler
+      - PRIMARY_COLOR=#0066cc
+      - PRIMARY_COLOR_DARK=#3399ff
+      - LOGO_URL=https://gadgeteer.co.za/wp-content/uploads/2021/12/hardhead-bevel90px.gif
+      - LOGO_URL_DARK=https://gadgeteer.co.za/wp-content/uploads/2021/12/hardhead-bevel90px.gif
+      - LOGO_ICON_URL=https://gadgeteer.co.za/wp-content/uploads/2021/12/hardhead-bevel90px.gif
+    env_file:
+      - stack.env
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+
+volumes:
+  Rallly:
+    # Specify name so it does not append stack name
+    name: Rallly
+
+networks:
+  reverse-proxy-net:
+    # Network is for reverse proxy to connect to container services
+    external: true
+    # Specify name so that it does not append stack name
+    name: reverse-proxy-net
+  rallly:
+    driver: bridge
+    name: rallly
