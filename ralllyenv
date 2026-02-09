@@ -1,4 +1,5 @@
 POSTGRES_PASSWORD=redacted
+SECRET_PASSWORD=redacted
 ALLOWED_EMAILS=redacted,redacted,redacted,redacted
 SUPPORT_EMAIL=redacted
 SMTP_USER=redacted
