@@ -1,0 +1,29 @@
+# An open source, self-hosted, real-time port monitoring and discovery tool
+services:
+  portracker:
+    image: mostafawahied/portracker:latest
+    container_name: portracker
+    hostname: portracker
+    restart: unless-stopped
+    pid: "host"  # Required for port detection
+    # Required permissions for system ports service namespace access
+    cap_add:
+      - SYS_PTRACE     # Linux hosts: read other PIDs' /proc entries
+      - SYS_ADMIN      # Docker Desktop: allow namespace access for host ports (required for MacOS)
+    security_opt:
+      - apparmor:unconfined # Required for system ports
+    volumes:
+      # Required for data persistence with host:internal for paths (don't chang right side)
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/portracker-data:/data
+      # Required for discovering services running in Docker
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      # external_port:internal_port (don't chnage right side)
+      - "4999:4999"
+    # environment:
+      # Optional: For enhanced TrueNAS features
+      # - TRUENAS_API_KEY=your-api-key-here
+    labels:
+      # All optional for docker container updaters
+      com.centurylinklabs.watchtower.enable: "true"
+      wud.display.name: portracker
