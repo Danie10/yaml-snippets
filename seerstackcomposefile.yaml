@@ -1,0 +1,239 @@
+# Seer stack with related *arr servives using the Proton VPN inside gluetun service
+
+networks:
+  myomvlan:
+    external: true
+    name: myomvlan
+
+services:
+############################
+# Gluetun - VPN
+############################
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    hostname: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
+      - WIREGUARD_PUBLIC_KEY=${WIREGUARD_PUBLIC_KEY}
+      - PROTONVPN_API_EMAIL=${PROTONVPN_API_EMAIL}
+      - PROTONVPN_API_PASSWORD=${PROTONVPN_API_PASSWORD}
+      # Proton specific: Port forwarding
+      - VPN_PORT_FORWARDING=on
+      - VPN_PORT_FORWARDING_PROVIDER=protonvpn
+      # Network settings
+      - TZ=Africa/Johannesburg
+      - SERVER_COUNTRIES=South Africa,France,Germany # Add a backup country
+      - BLOCK_MALICIOUS=off
+      - UPDATER_PERIOD=24h # Automatically keeps server IPs fresh
+      - DOT=off # Keeps DNS simple for OMV
+      - VPN_RESTART_ON_FAILURE=false
+      # Next line updates Qbittorrent config to new VPN forwarding port after restarts
+      - VPN_PORT_FORWARDING_UP_COMMAND=wget -qO- --post-data="json={\"listen_port\":{{PORT}}}" http://localhost:8080/api/v2/app/setPreferences
+      - FIREWALL_OUTBOUND_SUBNETS=192.168.20.2/32  # So that Flaresolverr can access it
+    networks:
+      - myomvlan
+    ports:
+      - 8080:8080 # qBittorrent WebUI
+      - 9696:9696 # Prowlarr
+#      - 8191:8191 # Flaresolverr
+      - 7878:7878 # Radarr
+      - 8989:8989 # Sonarr
+      - 5299:5299 # LazyLibrarian
+      - 9999:9999 # For container healthcheck
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      wud.display.name: gluetun
+      wud.link.template: https://github.com/qdm12/gluetun/releases/
+    restart: unless-stopped
+############################
+# Qbittorrent - Bittorrent
+############################
+  qbittorrent:
+    image: ghcr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    network_mode: service:gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Africa/Johannesburg
+      - WEBUI_PORT=8080
+    volumes:
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/qbittorrent:/config
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/openvpn/downloads:/downloads
+    depends_on:
+      - gluetun
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      wud.display.name: qbittorrent
+      dev.quenary.tugtainer.depends_on: gluetun
+############################
+# Sonarr - TV Shows
+############################
+  sonarr:
+    # TV
+    image: ghcr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Africa/Johannesburg
+    volumes:
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/openvpn/sonarr-config:/config
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/openvpn/downloads:/downloads
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/jellyfin/media/TV:/tv
+    network_mode: service:gluetun # This moves Radarr into the VPN
+    depends_on:
+      - gluetun
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      wud.display.name: sonarr
+      dev.quenary.tugtainer.depends_on: gluetun
+############################
+# Radarr - Movies
+############################
+  radarr:
+    # Movies
+    image: ghcr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Africa/Johannesburg
+    volumes:
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/openvpn/radarr/config:/config
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/openvpn/downloads:/downloads
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/jellyfin/media/Movies:/movies
+    network_mode: service:gluetun # This moves Radarr into the VPN
+    depends_on:
+      - gluetun
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      wud.display.name: radarr
+      dev.quenary.tugtainer.depends_on: gluetun
+############################
+# LazyLibrarian - Books
+############################
+  lazylibrarian:
+    # Books
+    image: linuxserver/lazylibrarian:latest
+    container_name: lazylibrarian
+    network_mode: service:gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Africa/Johannesburg
+    volumes:
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/openvpn/lazylibrarian/config:/config
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/openvpn/downloads:/downloads
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/jellyfin/media/Books:/books
+    depends_on:
+      - gluetun
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      wud.display.name: lazylibrarian
+      dev.quenary.tugtainer.depends_on: gluetun
+############################
+# Prowlarr - Manage Indexers
+############################
+  prowlarr:
+    image: ghcr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: service:gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Africa/Johannesburg
+    volumes:
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/openvpn/prowlarr/config:/config
+    depends_on:
+      - gluetun
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      wud.display.name: prowlarr
+      dev.quenary.tugtainer.depends_on: gluetun
+############################
+# Flaresolverr - Cloudflare proxy
+############################
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    # network_mode: service:gluetun
+    ports:
+      - 8191:8191
+    shm_size: "2gb"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Africa/Johannesburg
+      - BROWSER_TIMEOUT=60000
+      - TEST_URL=https://www.google.com
+      - BROWSER_ARGS=--headless=new,--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--disable-software-rasterizer
+    depends_on:
+      - gluetun
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      wud.display.name: flaresolverr
+      dev.quenary.tugtainer.depends_on: gluetun
+############################
+# Bazarr - Subtitles
+############################
+  bazarr:
+    image: ghcr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Africa/Johannesburg
+    volumes:
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/openvpn/bazarr:/config
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/jellyfin/media/Movies:/movies  # Match Radarr's host path for /movies
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/jellyfin/media/TV:/tv         # Exact host path Sonarr uses for /tv # Path to Jellyfin library
+    ports:
+      - 6767:6767
+    restart: unless-stopped
+    networks:
+      - myomvlan
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      wud.display.name: bazarr
+############################
+# Seerr - Discovery and Requests
+############################
+  seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    init: true
+    container_name: seerr
+    hostname: seerr
+    environment:
+      - LOG_LEVEL=info
+      - TZ=Africa/Johannesburg
+    volumes:
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/seerr:/app/config
+    networks:
+      - myomvlan
+    ports:
+      - 5055:5055
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      retries: 3
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      wud.display.name: seerr
