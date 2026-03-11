@@ -1,0 +1,19 @@
+# Used to display status of a Portainer stack (#110 in my case)
+    - BentoPDF Stack:
+        icon: portainer
+        widget:
+          type: "customapi"
+          url: "http://192.168.20.2:9000/api/stacks/110"
+          method: "GET"
+          headers:
+            X-API-Key: "redacted"
+          mappings:
+            - field: Status
+              label: State
+              format: text
+              remap:
+                - value: 1
+                  to: "🟢 STARTED"
+                - value: 2
+                  to: "🔴 STOPPED"
+              color: adaptive
