@@ -2,8 +2,8 @@
 
 # Configuration
 PORTAINER_URL="http://192.168.20.2:9000"
-API_TOKEN="redacted"
-STACK_ID="110"
+API_TOKEN="redacted"   # Get from creating API key in Portainer user account
+STACK_ID="110"   # Get from URL when stack is open in Portainer - see id=xxx
 
 # Fetch Stack Info
 RESPONSE=$(curl -s -X GET "$PORTAINER_URL/api/stacks/$STACK_ID" \
