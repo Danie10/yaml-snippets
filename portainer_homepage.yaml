@@ -1,0 +1,21 @@
+# Uses Homepage custom API widget to get status for stack, in this stack number 110
+# Stack number seen in Portainer app URL when stack is open
+# Token created in Portainer app in User account / Access tokens
+    - BentoPDF Stack:
+        icon: portainer
+        widget:
+          type: "customapi"
+          url: "http://192.168.20.2:9000/api/stacks/110"
+          method: "GET"
+          headers:
+            X-API-Key: "your_api_key"
+          mappings:
+            - field: Status
+              label: State
+              format: text
+              remap:
+                - value: 1
+                  to: "🟢 STARTED"
+                - value: 2
+                  to: "🔴 STOPPED"
+              color: adaptive
