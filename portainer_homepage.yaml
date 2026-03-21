@@ -1,3 +1,4 @@
+# Added in Homepage's services.yaml file
 # Uses Homepage custom API widget to get status for stack, in this stack number 110
 # Stack number seen in Portainer app URL when stack is open
 # Token created in Portainer app in User account / Access tokens
