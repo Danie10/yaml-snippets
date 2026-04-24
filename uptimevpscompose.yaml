@@ -1,0 +1,43 @@
+# I placed this file docker-compose.yml in ~/monitoring
+# So edit with nano ~/monitoring/docker-compose.yml
+# My VPS level firewall only allowed ports 22, 80, 443, and 4567 (Beszel) restricted to my public IP
+
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: always
+    volumes:
+      - ./uptime-kuma-data:/app/data
+      # Optional: mount docker socket to monitor containers on this VPS
+      # - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    restart: always
+    ports:
+      # Port 80 needed to create/update SSL certificates
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - uptime-kuma
+
+  beszel-agent:
+    image: henrygd/beszel-agent:latest
+    container_name: beszel-agent
+    restart: always
+    network_mode: host # This allows it to see host metrics easier
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - KEY=ssh-ed25519 redacted-from-beszel-portal
+      - PORT=4567
+
+volumes:
+  caddy_data:
+  caddy_config:
