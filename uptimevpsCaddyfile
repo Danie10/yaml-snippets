@@ -1,0 +1,8 @@
+# This file goes in the Uptime VPS ~/monitoring folder
+# So create with nano ~/moniroring/Caddyfile
+
+# It routes my sub-domain to the container named uptime-kuma with internal port 3001
+# Chnage this domain name to whatever you are using
+uptime.gadgeteer.co.za {
+    reverse_proxy uptime-kuma:3001
+}
