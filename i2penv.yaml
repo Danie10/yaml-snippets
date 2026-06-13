@@ -1,0 +1,3 @@
+EXT_PORT=1234  # Or whatever you want to use as incoming port
+JVM_XMX=512m   # I limited RAM for Javascript
+TZ=Africa/Johannesburg
