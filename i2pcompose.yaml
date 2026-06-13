@@ -1,0 +1,46 @@
+networks:
+  # I have a shared front-end access network called myomvlan
+  myomvlan:
+    external: true
+    name: myomvlan
+
+services:
+  i2p:
+    image: geti2p/i2p:latest
+    container_name: i2p
+    hostname: i2p
+    restart: unless-stopped
+    env_file:
+      - stack.env
+    networks:
+      - myomvlan
+    ports:
+      - 7657:7657  # Console
+      - 7658:7658  # Jetty eepsite (critical!)
+#      - 7652:7652 # UPnP HTTP TCP event listener
+#      - 7653:7653 # UPnP SSDP UDP search response listener
+#      - 6668:6668 # IRC Proxy
+      - 4444:4444 # HTTP Proxy
+      - 4445:4445 # HTTPS Proxy
+      - 7654:7654 # I2CP (I2P Control Protocol) 
+      - 7655:7655 # SAM Bridge (UDP)
+      - 7656:7656 # SAM Bridge (TCP)
+      - 7659:7659 # SMTP Proxy
+      - 2827:2827 # BOB Bridge
+      - 9150:9150 # Tor Browser SOCKS Proxy
+      - ${EXT_PORT}:12345/tcp # I2NP Protocol
+      - ${EXT_PORT}:12345/udp # I2NP Protocol
+    volumes:
+      # Left side is my server host physical path:Right side is internal container path
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/i2pconfig:/i2p/.i2p
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/i2ptorrents:/i2psnark
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      wud.display.name: I2P
+#    healthcheck:
+#      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:7657/i2ptunnel"]
+#      start_period: 600s  # 10min I2P boot
+#      interval: 40s
+#      timeout: 30s
+#      retries: 5
+
