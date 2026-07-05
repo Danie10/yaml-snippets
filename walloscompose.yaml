@@ -1,0 +1,25 @@
+networks:
+  myomvlan:
+    external: true
+    name: myomvlan
+
+services:
+  wallos:
+    container_name: wallos
+    hostname: wallos
+    image: bellamy/wallos:latest
+    networks:
+      - myomvlan
+    ports:
+      - "8282:80/tcp"
+    environment:
+      TZ: 'Africa/Johannesburg'
+    # Volumes store your data between container upgrades
+    volumes:
+      - '/srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/Wallos/db:/var/www/html/db'
+      - '/srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/Wallos/logos:/var/www/html/images/uploads/logos'
+    restart: unless-stopped
+    labels:
+      # These are all needed for Watchtower or WUD updaters only
+      com.centurylinklabs.watchtower.enable: true # Watchtower updates
+      wud.display.name: wallos
