@@ -1,0 +1,66 @@
+services:
+    joplin-db:
+        image: postgres:15
+        container_name: joplin-db
+        hostname: joplin-db
+        volumes:
+            - joplindb:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+        networks:
+          joplin-net:
+        restart: unless-stopped
+        labels:
+          com.centurylinklabs.watchtower.enable: "true"
+        environment:
+            - POSTGRES_PASSWORD=redacted
+            - POSTGRES_USER=postgres
+            - POSTGRES_DB=joplin
+            - TZ=Africa/Johannesburg
+    app:
+        image: joplin/server:latest
+        container_name: joplin
+        hostname: joplin
+        depends_on:
+            - joplin-db
+        ports:
+            - "22300:22300"
+        networks:
+          joplin-net:
+          reverse-proxy-net:
+        restart: unless-stopped
+        labels:
+          com.centurylinklabs.watchtower.enable: "true"
+        environment:
+            - APP_PORT=22300
+            - APP_BASE_URL=https://joplin.gadgeteer.co.za
+            - DB_CLIENT=pg
+            - POSTGRES_PASSWORD=redacted
+            - POSTGRES_DATABASE=joplin
+            - POSTGRES_USER=postgres
+            - POSTGRES_PORT=5432
+            - POSTGRES_HOST=joplin-db
+            - MAILER_ENABLED=1
+            - MAILER_HOST=smtp.gmail.com
+            - MAILER_PORT=587
+#            - MAILER_SECURE=0
+            - MAILER_SECURITY=starttls
+            - MAILER_AUTH_USER=address@gmail.com
+            - MAILER_AUTH_PASSWORD=redacted
+            - MAILER_NOREPLY_NAME=Joplin
+            - MAILER_NOREPLY_EMAIL=address@gmail.com
+            - TZ=Africa/Johannesburg
+            
+networks:
+  joplin-net:
+    name: joplin-net
+  reverse-proxy-net:
+    # Joins existing network of this name
+    external: true
+    # Specify name so that it does not append stack name
+    name: reverse-proxy-net
+
+volumes:
+  joplindb:
+    # Specify name so it does not append stack name
+    name: joplindb
