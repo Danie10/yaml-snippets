@@ -1,0 +1,51 @@
+services:
+  whatsupdocker:
+    image: getwud/wud
+    container_name: whatsupdocker
+    hostname: whatsupdocker
+    restart: unless-stopped
+    env_file:
+      - stack.env
+    environment:
+      - TZ=Africa/Johannesburg
+      - WUD_WATCHER_LOCAL_CRON=0 14 * * 4  # Runs every 4th day of week at 2pm
+      - WUD_AUTH_BASIC_MY_USER=admin
+      - WUD_AUTH_BASIC_MY_HASH=${AUTH_BASIC_MY_HASH}
+      - WUD_WATCHER_LOCAL_WATCHALL=true
+      - WUD_TRIGGER_DOCKER_LOCAL_PRUNE=true
+      - WUD_TRIGGER_DOCKER_LOCAL_AUTO=false
+      - WUD_TRIGGER_SMTP_GMAIL_HOST=smtp.gmail.com
+      - WUD_TRIGGER_SMTP_GMAIL_PORT=465
+      - WUD_TRIGGER_SMTP_GMAIL_USER=${WUD_MAIL_FROM}
+      - WUD_TRIGGER_SMTP_GMAIL_PASS=${WUD_MAIL_PASSWORD}
+      - WUD_TRIGGER_SMTP_GMAIL_FROM=${WUD_MAIL_FROM}
+      - WUD_TRIGGER_SMTP_GMAIL_TO=${WUD_MAIL_TO}
+      - WUD_TRIGGER_SMTP_GMAIL_TLS_ENABLED=true
+      - WUD_TRIGGER_SMTP_GMAIL_SIMPLETITLE=OMV Server - New $${container.updateKind.kind} found for container $${container.name}
+      - WUD_REGISTRY_HUB_PUBLIC_LOGIN=${HUB_LOGIN}
+      - WUD_REGISTRY_HUB_PUBLIC_PASSWORD=${HUB_PASSWORD}
+    networks:
+      - reverse-proxy-net
+    ports:
+      - 3018:3000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /srv/dev-disk-by-uuid-e6c3b71f-ef88-4055-a599-fb607c4baed2/data/appdata/Config/wud:/store
+    healthcheck:
+      test: curl --fail http://localhost:3000/health || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+      wud.tag.include: ^\d+\.\d+\.\d+$$
+      wud.link.template: https://github.com/getwud/wud/releases/tag/$${major}.$${minor}.$${patch}
+      wud.display.name: Whats Up Docker WUD
+
+networks:
+  reverse-proxy-net:
+    # Joins existing network of this name so that Nginx Proxy Manager can connect
+    external: true
+    # Specify name so that it does not append stack name
+    name: reverse-proxy-net
