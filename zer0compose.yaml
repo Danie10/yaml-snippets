@@ -1,4 +1,7 @@
 # Link shortener from https://github.com/neoemit/zer0
+# Make sure it is named to docker-compose.override.yml
+# And is located in /opt/docker/zer0
+# This prevents it being overwritten by a GitHub repo pull
 services:
   zer0:
     build: .
