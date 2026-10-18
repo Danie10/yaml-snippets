@@ -1,3 +1,5 @@
+# Name this file .env
+# And is located in /opt/docker/zer0
 PUBLIC_BASE_URL=https://links.gadgeteer.co.za
 PORT=3010
 TRUST_PROXY=true
