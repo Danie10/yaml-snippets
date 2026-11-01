@@ -1,0 +1,16 @@
+POSTGRES_PASSWORD=enter-yours
+SECRET_KEY_BASE=generate-yours
+
+POSTGRES_USER=postgres
+POSTGRES_DB=dawarich_production
+
+# Hostnames/IPs you'll browse to (no protocol, no port)
+APPLICATION_HOSTS=dawarich.gadgeteerza.co.za,192.168.20.2,localhost,127.0.0.1
+APPLICATION_PROTOCOL=http
+TIME_ZONE=Africa/Johannesburg
+DAWARICH_APP_PORT=3050
+
+APP_MEMORY_LIMIT=3G
+APP_CPU_LIMIT=2.0
+REVERSE_GEOCODING_RPS=5               # Upped for paid Chibigeo subscription service
+BACKGROUND_PROCESSING_CONCURRENCY=7   # Upped for paid Chibigeo subscription service
