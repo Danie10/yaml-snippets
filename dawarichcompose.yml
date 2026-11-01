@@ -1,0 +1,118 @@
+# Dawarich on OMV — based on official docker/docker-compose.yml (master, 2026-11-01, Dawarich 1.20.0)
+# Self-hosted Google Timeline alternative.
+# Since 1.17.0 background jobs (Sidekiq) run INSIDE dawarich_app (SIDEKIQ_EMBEDDED) — no separate worker.
+# Local changes: bind mounts under /APPDATA/Config/dawarich, secrets via .env, TZ, memory caps, port 3050,
+# only dawarich_app joins myomvlan; db/redis stay on the private "dawarich" network.
+
+networks:
+  myomvlan:
+    external: true     # My existing front-end docker network
+    name: myomvlan
+  dawarich:            # private stack network for Dawarich
+
+services:
+  dawarich_redis:
+    image: redis:7.4-alpine
+    container_name: dawarich_redis
+    command: redis-server --save 900 1 --save 300 10 --appendonly no
+    networks: [dawarich]
+    volumes:
+      - /APPDATA/Config/dawarich/shared:/data
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 1G     # ~300 MB data + headroom for background saves
+    labels:
+      dockhand.update: "false"
+
+  dawarich_db:
+    image: postgis/postgis:17-3.5-alpine
+    container_name: dawarich_db
+    shm_size: 1G
+    networks: [dawarich]
+    volumes:
+      - /APPDATA/Config/dawarich/db_data:/var/lib/postgresql/data
+      - /APPDATA/Config/dawarich/shared:/var/shared
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    restart: always
+    stop_grace_period: 2m          # let Postgres shut down cleanly
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 300s           # allow time for crash recovery
+      timeout: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    labels:
+      dockhand.update: "false"
+
+  dawarich_app:
+    image: freikin/dawarich:latest
+    container_name: dawarich_app
+    networks: [dawarich, myomvlan]    # Connects to front-end as well as Dawarich networks
+    ports:
+      - "${DAWARICH_APP_PORT:-3050}:3000"
+    volumes:
+      - /APPDATA/Config/dawarich/public:/var/app/public
+      - /APPDATA/Config/dawarich/watched:/var/app/tmp/imports/watched
+      - /APPDATA/Config/dawarich/storage:/var/app/storage
+      - /APPDATA/Config/dawarich/db_data:/dawarich_db_data
+    stdin_open: true
+    tty: true
+    entrypoint: web-entrypoint.sh
+    command: ['bin/rails', 'server', '-p', '3000', '-b', '::']
+    restart: unless-stopped
+    environment: &dawarich_env        # Dockhand syntax incs secret keys
+      RAILS_ENV: production
+      REDIS_URL: redis://dawarich_redis:6379
+      DATABASE_HOST: dawarich_db
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_NAME: ${POSTGRES_DB}
+      APPLICATION_HOSTS: ${APPLICATION_HOSTS}
+      APPLICATION_PROTOCOL: ${APPLICATION_PROTOCOL:-http}
+      TIME_ZONE: ${TIME_ZONE:-Africa/Johannesburg}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      SELF_HOSTED: "true"
+      STORE_GEODATA: "true"
+      RAILS_LOG_TO_STDOUT: "true"
+      PROMETHEUS_EXPORTER_ENABLED: "false"
+      # Embedded background jobs (Dawarich >= 1.17.0)
+      SIDEKIQ_EMBEDDED: "true"
+      WEB_CONCURRENCY: "0"
+      BACKGROUND_PROCESSING_CONCURRENCY: ${BACKGROUND_PROCESSING_CONCURRENCY:-2}
+      # chibigeo Hobby = 1 req/s sustained; keeps Dawarich under the limit
+      REVERSE_GEOCODING_RPS: ${REVERSE_GEOCODING_RPS:-1}
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "3"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO - http://127.0.0.1:3000/api/v1/health | grep -q '\"status\"\\s*:\\s*\"ok\"'"]
+      interval: 10s
+      retries: 30
+      start_period: 60s
+      timeout: 10s
+    depends_on:
+      dawarich_db: {condition: service_healthy, restart: true}
+      dawarich_redis: {condition: service_healthy, restart: true}
+    deploy:
+      resources:
+        limits:
+          cpus: ${APP_CPU_LIMIT:-2.0}
+          memory: ${APP_MEMORY_LIMIT:-3G}   # web + jobs now share this container
