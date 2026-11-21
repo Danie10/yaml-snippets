@@ -1,0 +1,29 @@
+networks:
+  # I set it to joing my front-end network instead of creating its own new network
+  myomvlan:
+    external: true
+    name: myomvlan
+
+services:
+  dockhand:
+    image: fnsys/dockhand:latest
+    container_name: dockhand
+    restart: unless-stopped
+    environment:
+      - PUID=998
+      - PGID=100
+      - TZ=Africa/Johannesburg
+      - DATA_DIR=/APPDATA/Config/dockhand
+      # - SKIP_DF_COLLECTION=true   # enable if the dashboard is slow
+    group_add:
+      - "995"   # docker group GID on OMV, for socket access
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # My OMV server expands the /APPDATA path so in your case you'd use full path from / root
+      - /APPDATA/Config/dockhand:/APPDATA/Config/dockhand
+    networks:
+      - myomvlan
+    ports:
+      - 9002:3000
+    labels:
+      dockhand.update: "false"
