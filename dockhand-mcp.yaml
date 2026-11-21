@@ -1,0 +1,32 @@
+# Image built from source (no registry image is used)
+# On your PC clone github.com/craibo/dockhand-mcp:
+# Copy the source with rsync to /APPDATA/Config/dockhand-mcp/src on host (so that my daily DATA-A → DATA-B backup included it)
+# Build the image:
+# run `cd /APPDATA/Config/dockhand-mcp/src && docker build -t dockhand-mcp:local .`
+# Tokens:
+# DOCKHAND_API_TOKEN: I created it in OMV Dockhand under Settings → API tokens
+# MCP_AUTH_TOKEN: a random value using command `openssl rand -hex 32`, saved on your PC in ~/.secrets/dockhand-omv-mcp.env (mode 600)
+services:
+  dockhand-mcp:
+    image: dockhand-mcp:local
+    container_name: dockhand-mcp
+    hostname: dockhand-mcp
+    restart: unless-stopped
+    environment:
+      DOCKHAND_URL: http://dockhand:3000
+      DOCKHAND_API_TOKEN: ${DOCKHAND_API_TOKEN}
+      MCP_AUTH_TOKEN: ${MCP_AUTH_TOKEN}
+      MCP_ALLOWED_HOSTS: 192.168.20.2   # Whatever IP your host uses
+      DOCKHAND_MCP_READONLY: "true"     # This stopped AI writing or chnaging in Dockhand
+      TZ: Africa/Johannesburg
+    networks:
+      - myomvlan
+    ports:
+      - 8787:8787
+    labels:
+      dockhand.update: "false"   # local build — Dockhand can't update it
+networks:
+  myomvlan:
+    external: true
+    name: myomvlan
+# You need to then add the MCP connector in your AO to connecvt to IP:8787
